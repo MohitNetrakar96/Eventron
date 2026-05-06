@@ -1,5 +1,4 @@
-// Simple admin auth proxy that uses node-fetch for server-side requests
-import fetch from 'node-fetch';
+// Simple admin auth proxy that uses server-side requests
 
 export default async function handler(req, res) {
   // Set CORS headers
