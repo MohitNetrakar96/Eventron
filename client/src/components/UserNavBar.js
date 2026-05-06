@@ -1,0 +1,149 @@
+import UserDropdown from "@/components/UserDropdown";
+import { getUserToken } from "@/utils/getUserToken";
+import Image from "next/image";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+
+import { useRef } from "react";
+export default function NavBar() {
+    const router = useRouter();
+
+    const userIdCookie = getUserToken();
+    const [userData, setUserData] = useState({});
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const mobileMenuRef = useRef(null);
+
+    // fetch the user data as soon as the page loads
+    const fetchUserData = async () => {
+        // If cookie was manually removed from browser
+        if (!userIdCookie) {
+            console.error("No cookie found! Please signin");
+            // redirect to signin
+            router.push("/users/signin");
+        }
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/user/details`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    user_token: userIdCookie,
+                }),
+            }
+        );
+        if (!response.ok)
+            throw new Error(`${response.status} ${response.statusText}`);
+
+        // User Details fetched from API `/user/details`
+        try {
+            const data = await response.json();
+            setUserData(data);
+        } catch (error) {
+            console.error("Invalid JSON string:", error.message);
+        }
+    };
+
+    useEffect(() => {
+        fetchUserData();
+    }, []);
+
+    // Close mobile menu on outside click
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target) && !event.target.closest('.mobile-menu-button')) {
+                setMobileMenuOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [mobileMenuRef]);
+
+    return (
+        <div className="mb-[8vh]">
+            <header className="bg-[color:var(--white-color)] fixed top-0 z-50 w-full shadow-md text-[color:var(--darker-secondary-color)]">
+                <div className="flex items-center justify-between p-4 lg:hidden relative">
+                    {/* Hamburger Toggle */}
+                    <button
+                        className="mobile-menu-button focus:outline-none z-50"
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        aria-label="Toggle mobile menu"
+                    >
+                        {mobileMenuOpen ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        )}
+                    </button>
+                    {/* Centered Logo */}
+                    <div
+                        onClick={() => router.push("/users/dashboard")}
+                        className="flex flex-col items-center absolute left-1/2 -translate-x-1/2 cursor-pointer z-10"
+                    >
+                        <Image
+                            src="/favicon_io/android-chrome-192x192.png"
+                            width={40}
+                            height={40}
+                            alt="Logo"
+                            className="h-8 w-8"
+                        />
+                        <h1 className="text-black font-bold text-2xl">
+                            <span className="text-[color:var(--darker-secondary-color)]">EVENT</span>
+                            <span className="text-black">X</span>
+                        </h1>
+                    </div>
+                </div>
+                {/* Mobile Slide-out Menu */}
+                <div
+                    ref={mobileMenuRef}
+                    className={`fixed top-0 left-0 h-screen w-64 z-40 transform transition-transform duration-500 ease-in-out backdrop-blur-xl bg-white bg-opacity-95 border-r border-gray-200 shadow-2xl ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
+                >
+                    <div className="flex flex-col h-full p-6">
+                        <div className="flex flex-col space-y-6 mb-8 mt-8">
+                            <a onClick={() => {router.push('/'); setMobileMenuOpen(false);}} className="text-lg font-medium border-b border-gray-200 pb-2 hover:text-[color:var(--secondary-color)] transition duration-300 cursor-pointer">Home</a>
+                            <a onClick={() => {router.push('/users/dashboard'); setMobileMenuOpen(false);}} className="text-lg font-medium border-b border-gray-200 pb-2 hover:text-[color:var(--secondary-color)] transition duration-300 cursor-pointer">Dashboard</a>
+                            <a onClick={() => {router.push('/users/past_events'); setMobileMenuOpen(false);}} className="text-lg font-medium border-b border-gray-200 pb-2 hover:text-[color:var(--secondary-color)] transition duration-300 cursor-pointer">Past Events</a>
+                            <a onClick={() => {router.push('/calendar'); setMobileMenuOpen(false);}} className="text-lg font-medium border-b border-gray-200 pb-2 hover:text-[color:var(--secondary-color)] transition duration-300 cursor-pointer">Calendar</a>
+                        </div>
+                        <div className="mt-auto">
+                            <UserDropdown userData={userData} />
+                        </div>
+                    </div>
+                </div>
+                {/* Desktop Nav */}
+                <div className="container mx-auto hidden lg:flex items-center flex-row justify-between p-4">
+                    <div
+                        onClick={() => router.push("/users/dashboard")}
+                        className="flex items-center gap-x-3 cursor-pointer"
+                    >
+                        <Image
+                            src="/favicon_io/android-chrome-192x192.png"
+                            width={500}
+                            height={500}
+                            alt="Logo"
+                            className="h-8 w-8"
+                        />
+                        <h1 className="m-2 text-black font-bold text-4xl">
+                            <span className="text-[color:var(--darker-secondary-color)]">EVENT</span>
+                            <span className="text-black">X</span>
+                        </h1>
+                    </div>
+                    <nav className="text-sm">
+                        <ul className="flex items-center">
+                            <li onClick={() => router.push("/")} className="mr-4 cursor-pointer"><a>Home</a></li>
+                            <li onClick={() => router.push("/users/dashboard")} className="mr-4 cursor-pointer"><a>Dashboard</a></li>
+                            <li onClick={() => router.push("/users/past_events")} className="mr-4 cursor-pointer"><a>Past Events</a></li>
+                            <li onClick={() => router.push("/calendar")} className="mr-4 cursor-pointer"><a>Calendar</a></li>
+                            <UserDropdown userData={userData} />
+                        </ul>
+                    </nav>
+                </div>
+            </header>
+        </div>
+    );
+}

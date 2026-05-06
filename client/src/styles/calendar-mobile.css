@@ -1,0 +1,38 @@
+/* FullCalendar mobile responsiveness overrides */
+@media (max-width: 640px) {
+  .fc {
+    font-size: 0.85rem !important;
+  }
+  .fc-header-toolbar {
+    flex-direction: column !important;
+    gap: 0.5rem;
+  }
+  .fc .fc-toolbar-title {
+    font-size: 1.1rem !important;
+  }
+  .fc .fc-button {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.85rem !important;
+  }
+  .fc .fc-daygrid-day-frame {
+    min-height: 40px !important;
+    padding: 2px !important;
+  }
+  .fc .fc-scrollgrid-sync-table {
+    min-width: 350px !important;
+    width: 100vw !important;
+  }
+  .fc .fc-daygrid-body {
+    min-width: 350px !important;
+    width: 100vw !important;
+    overflow-x: auto !important;
+  }
+  .fc .fc-col-header-cell {
+    font-size: 0.80rem !important;
+    padding: 2px 0 !important;
+  }
+  .fc .fc-daygrid-day-number {
+    font-size: 0.80rem !important;
+    padding: 0 !important;
+  }
+}
