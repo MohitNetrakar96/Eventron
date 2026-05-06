@@ -1,4 +1,0 @@
-{
-  "framework": "nextjs",
-  "installCommand": "npm install tailwindcss postcss autoprefixer --legacy-peer-deps && npm install --legacy-peer-deps"
-}
