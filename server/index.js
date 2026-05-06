@@ -49,9 +49,9 @@ app.use(cookieParser());
 // Enhanced CORS configuration
 const corsOptions = {
     origin: function (origin, callback) {
-        const allowedOrigins = ['https://eventxmanagement.vercel.app', 'http://localhost:3000', 'http://localhost:3001'];
+        const allowedOrigins = [process.env.CLIENT_URL, 'http://localhost:3000', 'http://localhost:3001'];
         // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
             callback(null, true);
         } else {
             console.log('CORS blocked origin:', origin);
@@ -73,7 +73,7 @@ app.options('*', cors(corsOptions));
 
 // Special handler for admin auth endpoint
 app.options('/admin/auth', (req, res) => {
-    res.header('Access-Control-Allow-Origin', req.headers.origin || 'https://eventxmanagement.vercel.app');
+    res.header('Access-Control-Allow-Origin', req.headers.origin || process.env.CLIENT_URL);
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
     res.header('Access-Control-Allow-Credentials', 'true');
@@ -82,14 +82,14 @@ app.options('/admin/auth', (req, res) => {
 
 // Global middleware to ensure CORS headers are set for all responses
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', req.headers.origin || 'https://eventxmanagement.vercel.app');
+    res.header('Access-Control-Allow-Origin', req.headers.origin || process.env.CLIENT_URL);
     res.header('Access-Control-Allow-Credentials', 'true');
     next();
 });
 
 // Also keep the standard cors middleware as a fallback
 app.use(cors({
-  origin: ['https://eventxmanagement.vercel.app', 'http://localhost:3000', 'http://localhost:3001'],
+  origin: [process.env.CLIENT_URL, 'http://localhost:3000', 'http://localhost:3001'],
   credentials: true,
   preflightContinue: false,
   optionsSuccessStatus: 204
