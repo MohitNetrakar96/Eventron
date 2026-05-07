@@ -46,23 +46,13 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true, parameterLimit: 50
 
 app.use(cookieParser());
 
-// Enhanced CORS configuration
+// Simplified and highly permissive CORS configuration
 const corsOptions = {
-    origin: function (origin, callback) {
-        const allowedOrigins = [process.env.CLIENT_URL, 'http://localhost:3000', 'http://localhost:3001'];
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin || allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
-            callback(null, true);
-        } else {
-            console.log('CORS blocked origin:', origin);
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
+    origin: true, // Allows any origin
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
     credentials: true,
-    preflightContinue: false,
-    optionsSuccessStatus: 204
+    optionsSuccessStatus: 200
 };
 
 // Apply CORS middleware
@@ -71,40 +61,18 @@ app.use(cors(corsOptions));
 // Handle preflight requests explicitly
 app.options('*', cors(corsOptions));
 
-// Special handler for admin auth endpoint
-app.options('/admin/auth', (req, res) => {
-    res.header('Access-Control-Allow-Origin', req.headers.origin || process.env.CLIENT_URL);
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.status(204).end();
-});
-
 // Global middleware to ensure CORS headers are set for all responses
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', req.headers.origin || process.env.CLIENT_URL);
+    const origin = req.headers.origin || process.env.CLIENT_URL || '*';
+    res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
     next();
-});
-
-// Also keep the standard cors middleware as a fallback
-app.use(cors({
-  origin: [process.env.CLIENT_URL, 'http://localhost:3000', 'http://localhost:3001'],
-  credentials: true,
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-}));
-
-// Add preflight OPTIONS handling for all routes
-app.options('*', cors());
-
-// Add a global OPTIONS handler as a last resort
-app.all('*', function(req, res, next) {
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-  next();
 });
 
 // Serve static files from the uploads directory
