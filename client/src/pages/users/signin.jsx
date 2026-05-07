@@ -46,67 +46,77 @@ export default function signin({ userIdCookie }) {
 
     const handleVerifyEmail = async (event) => {
         event.preventDefault();
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/user/signin`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    email: email,
-                }),
-            }
-        );
-        const data = await response.json();
-        if (response.status === 200) {
-            setMessage({ errorMsg: "", successMsg: data.msg });
-            console.log(data);
-            setStep(2); // Move to next step on the same page
-        } else {
-            console.error(`Failed with status code ${response.status}`);
-            setMessage({ errorMsg: data.msg, successMsg: "" });
-            // redirect to signup if shown "This Email ID is not registered. Try Signing Up instead!"
-            setTimeout(() => {
-                // Set success message
-                setMessage({
-                    errorMsg: "Redirecting you to SignUp ...",
-                    successMsg: "",
-                });
-            }, 1700);
+        try {
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/user/signin`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                    }),
+                }
+            );
+            const data = await response.json();
+            if (response.status === 200) {
+                setMessage({ errorMsg: "", successMsg: data.msg });
+                console.log(data);
+                setStep(2); // Move to next step on the same page
+            } else {
+                console.error(`Failed with status code ${response.status}`);
+                setMessage({ errorMsg: data.msg, successMsg: "" });
+                // redirect to signup if shown "This Email ID is not registered. Try Signing Up instead!"
+                setTimeout(() => {
+                    // Set success message
+                    setMessage({
+                        errorMsg: "Redirecting you to SignUp ...",
+                        successMsg: "",
+                    });
+                }, 1700);
 
-            // Redirect to dashboard
-            setTimeout(() => {
-                router.push("/users/signup");
-            }, 2500);
+                // Redirect to dashboard
+                setTimeout(() => {
+                    router.push("/users/signup");
+                }, 2500);
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
+            setMessage({ errorMsg: "Network error: Make sure the server is running.", successMsg: "" });
         }
     };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/user/signin/verify`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    email: email,
-                    otp: otp,
-                }),
-            }
-        );
-        const data = await response.json();
-        if (response.status === 200) {
-            setMessage({ errorMsg: "", successMsg: data.msg });
-            console.log(data);
-            setStep(3); // Move to next step on the same page
+        try {
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL}/user/signin/verify`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        otp: otp,
+                    }),
+                }
+            );
+            const data = await response.json();
+            if (response.status === 200) {
+                setMessage({ errorMsg: "", successMsg: data.msg });
+                console.log(data);
+                setStep(3); // Move to next step on the same page
 
-            setUserToken(data.user_id); // set cookie when signed up
-        } else {
-            console.error(`Failed with status code ${response.status}`);
-            setMessage({ errorMsg: data.msg, successMsg: "" });
+                setUserToken(data.user_id); // set cookie when signed up
+            } else {
+                console.error(`Failed with status code ${response.status}`);
+                setMessage({ errorMsg: data.msg, successMsg: "" });
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
+            setMessage({ errorMsg: "Network error: Make sure the server is running.", successMsg: "" });
         }
     };
 
