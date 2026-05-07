@@ -62,10 +62,10 @@ function EventPage() {
         fetchEvent();
     }, [eventId]); // fetch event on component mount and when eventId changes
 
-    if (!eventData || !eventData.cover)
-        // If event data isn't loaded correctly, it should recall API
-        return <div onLoad={fetchEvent()}>loading...</div>;
-    else
+    if (!eventData || !eventData.cover) {
+        // If event data isn't loaded correctly or still loading
+        return <div className="flex justify-center items-center h-screen">Loading Event... (If this takes too long, the event may not exist)</div>;
+    } else
         return (
             <div className="pt-20 lg:pt-8 bg-[color:var(--primary-color)]">
                 <UserNavBar />

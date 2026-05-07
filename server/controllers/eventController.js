@@ -731,7 +731,11 @@ const particularEvent = async (req, res) => {
     const eventId = req.body.event_id;
     Event.find({ event_id: eventId })
         .then((data) => {
-            res.status(200).send(data[0]);
+            if (data && data.length > 0) {
+                res.status(200).send(data[0]);
+            } else {
+                res.status(404).send({ msg: "Event not found" });
+            }
         })
         .catch((err) => {
             res.status(400).send({ msg: "Error fetching event", error: err });
